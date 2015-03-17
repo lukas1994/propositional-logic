@@ -2,6 +2,8 @@ module Formula
 ( Formula(..)
 , Context
 , eval
+, simplify
+, isCNF
 ) where
 
 data Formula = Var String
@@ -35,10 +37,22 @@ eval (NOT f) c = not $ eval f c
 eval (OR f1 f2) c = (eval f1 c) || (eval f2 c)
 eval (AND f1 f2) c = (eval f1 c) && (eval f2 c)
 
-{-
-simplify :: Formula :: Formula
-simplify f = case f of
-    | NOT (NOT f1) -> simplify f1
-    | OR (f1 (Const False)) -> simplify f1
-    | OR (f1 (Const True)) -> simplify f1
--}
+simplify :: Formula -> Formula
+simplify (NOT (Const b)) = Const (not b)
+simplify f = f
+
+isCNF :: Formula -> Bool
+isCNF = isCNF' False
+  where isCNF' :: Bool -> Formula -> Bool
+        isCNF' _ (Var _) = True
+        isCNF' _ (Const _) = True
+        isCNF' _ (NOT (Var _)) = True
+        isCNF' _ (NOT (Const _)) = True -- simplify before
+        isCNF' _ (NOT _) = False
+        isCNF' o (OR f1 f2) = (isCNF' True f1) && (isCNF' True f2)
+        isCNF' o (AND f1 f2) = if o then False else (isCNF' o f1) && (isCNF' o f2)
+
+main :: IO()
+main = do
+	let b = isCNF (OR (Var "P") (AND (Const True) (Var "W")))
+	putStr . show $ b
