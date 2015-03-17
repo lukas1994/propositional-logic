@@ -9,7 +9,14 @@ data Formula = Var String
              | NOT Formula
              | OR Formula Formula
              | AND Formula Formula
-    deriving (Show, Eq)
+    deriving Eq
+
+instance Show Formula where
+    show (Var s) = show s
+    show (Const b) = show b
+    show (NOT f) = "~(" ++ (show f) ++ ")"
+    show (OR f1 f2) = "(" ++ (show f1) ++ ") | (" ++ (show f2) ++ ")"
+    show (AND f1 f2) = "(" ++ (show f1) ++ ") & (" ++ (show f2) ++ ")"
 
 type Context = [(String, Bool)]
 
@@ -27,3 +34,11 @@ eval (Const b) _ = b
 eval (NOT f) c = not $ eval f c
 eval (OR f1 f2) c = (eval f1 c) || (eval f2 c)
 eval (AND f1 f2) c = (eval f1 c) && (eval f2 c)
+
+{-
+simplify :: Formula :: Formula
+simplify f = case f of
+    | NOT (NOT f1) -> simplify f1
+    | OR (f1 (Const False)) -> simplify f1
+    | OR (f1 (Const True)) -> simplify f1
+-}

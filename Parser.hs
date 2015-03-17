@@ -5,6 +5,8 @@ module Parser
 import Data.Char
 import Formula
 
+---- tokenizer ----
+
 data Token = TokOpAND
            | TokOpOR
            | TokOpNOT
@@ -35,8 +37,8 @@ variable c cs
     | otherwise = TokVar (c:name) : tokenize cs'
   where (name, cs') = span isAlphaNum cs
 
----- parser ----
 
+---- parser ----
 
 lookAhead :: [Token] -> Token
 lookAhead [] = TokEnd
@@ -100,4 +102,7 @@ parse toks = let (tree, toks') = expression toks
 parseFormula :: String -> Formula
 parseFormula = parse . tokenize
 
+
 main = (print . parse . tokenize) "~A|(B&C)| FALSE"
+
+
